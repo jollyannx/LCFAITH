@@ -138,8 +138,8 @@ const jHandle = document.getElementById('joystick-handle');
 let stickX = 0, stickY = 0, isDragging = false;
 
 // SENSITIVITY SETTINGS
-const maxDist = 35; // Lowered from 50: Thumb moves less to hit max speed
-const sensitivity = 1.5; // Multiplier: Makes small movements faster
+const maxDist = 10; // Lowered from 50: Thumb moves less to hit max speed
+const sensitivity = 4; // Multiplier: Makes small movements faster
 
 jBase.addEventListener('touchstart', (e) => { 
     isDragging = true; 
