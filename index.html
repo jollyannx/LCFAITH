@@ -16,7 +16,6 @@
             font-family: 'Fredoka', sans-serif;
             display: flex; flex-direction: column; 
             align-items: center; min-height: 100vh; overflow: hidden;
-            /* Prevents the whole page from "bouncing" on mobile */
             overscroll-behavior: none; 
         }
         header { 
@@ -43,17 +42,16 @@
         #insight-list { overflow-y: auto; flex-grow: 1; font-size: 0.9rem; margin-top: 10px; }
         .insight-entry { margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 4px solid #555; }
         
-        /* ROBLOX-STYLE FIXED JOYSTICK */
+        /* FIXED VIRTUAL JOYSTICK */
         #joystick-wrapper { 
             position: fixed; 
-            bottom: 40px; 
-            left: 40px; 
+            bottom: 50px; 
+            left: 50px; 
             width: 120px; 
             height: 120px; 
             z-index: 1000; 
             touch-action: none;
         }
-        /* Hide on Desktop */
         @media (min-width: 1024px) { #joystick-wrapper { display: none; } }
         
         #joystick-base {
@@ -65,12 +63,12 @@
         }
         #joystick-handle {
             width: 50px; height: 50px; 
-            background: rgba(190, 46, 221, 0.8); /* var(--fth-color) with alpha */
+            background: rgba(190, 46, 221, 0.8);
             border-radius: 50%; 
             position: absolute; 
             top: 50%; left: 50%;
-            transform: translate(-50%, -50%); 
-            box-shadow: 0 0 10px var(--fth-color);
+            transform: translate(-50%, -50%); /* Start perfectly centered */
+            box-shadow: 0 0 15px var(--fth-color);
             pointer-events: none; 
         }
 
@@ -125,7 +123,6 @@ const bgMusic = new Audio();
 bgMusic.loop = true;
 bgMusic.src = "https://github.com/jollyannx/LCFAITH/raw/refs/heads/main/%5Bno%20copyright%20music%5D%20%20coffee%20time%20%20cute%20vlog%20music.mp3"; 
 bgMusic.volume = 0.5;
-
 const collectSound = new Audio("https://actions.google.com/sounds/v1/foley/drawbridge_chain_clatter.ogg");
 
 function startAudio() {
@@ -137,9 +134,8 @@ const jBase = document.getElementById('joystick-base');
 const jHandle = document.getElementById('joystick-handle');
 let stickX = 0, stickY = 0, isDragging = false;
 
-// SENSITIVITY SETTINGS
-const maxDist = 1; // Lowered from 50: Thumb moves less to hit max speed
-const sensitivity = 2; // Multiplier: Makes small movements faster
+const maxDist = 45; // Increased to give a better physical range
+const sensitivity = 1.8; // High sensitivity for instant response
 
 jBase.addEventListener('touchstart', (e) => { 
     isDragging = true; 
@@ -154,6 +150,7 @@ window.addEventListener('touchmove', (e) => {
 window.addEventListener('touchend', () => {
     isDragging = false;
     stickX = 0; stickY = 0;
+    // Reset to center
     jHandle.style.transform = `translate(-50%, -50%)`;
 });
 
@@ -163,6 +160,7 @@ function moveJoystick(e) {
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     const touch = e.touches[0];
+    
     const dx = touch.clientX - centerX;
     const dy = touch.clientY - centerY;
     
@@ -172,10 +170,10 @@ function moveJoystick(e) {
     const mx = Math.cos(angle) * dist;
     const my = Math.sin(angle) * dist;
     
+    // Update visual handle position
     jHandle.style.transform = `translate(calc(-50% + ${mx}px), calc(-50% + ${my}px))`;
     
-    // Normalize and apply sensitivity multiplier
-    // Math.min/max ensures we don't exceed -1 to 1 range
+    // Calculate speed values (-1 to 1)
     stickX = Math.max(-1, Math.min(1, (mx / maxDist) * sensitivity));
     stickY = Math.max(-1, Math.min(1, (my / maxDist) * sensitivity));
 }
@@ -200,7 +198,8 @@ const rows = Math.floor(canvas.height / cellSize);
 let keys = {};
 
 function initGame() {
-    player = { x: cellSize/2, y: cellSize/2, size: 8, speed: 2.5 };
+    // Increased base speed to 3.5 for snappier movement
+    player = { x: cellSize/2, y: cellSize/2, size: 8, speed: 3.5 };
     fragments = []; walls = []; collectedCount = 0; visibilityRadius = 65; gameActive = true;
     
     const grid = [];
@@ -266,13 +265,11 @@ function update() {
     if (!gameActive) return;
     let dx = 0, dy = 0;
 
-    // Movement from Keyboard
     if (keys['KeyW'] || keys['ArrowUp']) dy = -player.speed;
     if (keys['KeyS'] || keys['ArrowDown']) dy = player.speed;
     if (keys['KeyA'] || keys['ArrowLeft']) dx = -player.speed;
     if (keys['KeyD'] || keys['ArrowRight']) dx = player.speed;
 
-    // Movement from Joystick (Overrides keyboard if active)
     if (isDragging) {
         dx = stickX * player.speed;
         dy = stickY * player.speed;
