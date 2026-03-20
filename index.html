@@ -12,18 +12,10 @@
             --bg-dark: #050508;
         }
         body { 
-            margin: 0; 
-            background: var(--bg-dark); 
-            color: white; 
+            margin: 0; background: var(--bg-dark); color: white; 
             font-family: 'Fredoka', sans-serif;
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            /* Fixed: Uses Dynamic Viewport Height to prevent cut-off */
-            height: 100dvh; 
-            width: 100vw;
-            overflow: hidden;
-            overscroll-behavior: none; 
+            display: flex; flex-direction: column; align-items: center; 
+            height: 100dvh; width: 100vw; overflow: hidden; overscroll-behavior: none; 
         }
         header { 
             width: 100%; padding: 10px 0; text-align: center; background: #111; 
@@ -33,91 +25,57 @@
         #stats { font-size: 0.9rem; color: var(--sci-color); margin-top: 2px; font-weight: 600; }
         
         #main-container { 
-            display: flex; 
-            flex-direction: column; 
-            width: 100%; 
-            max-width: 950px; 
-            align-items: center; 
-            padding: 10px; 
-            box-sizing: border-box;
-            flex-grow: 1;
-            overflow-y: auto; /* Allows scrolling if content is too tall */
-            padding-bottom: 180px; /* Space for the D-Pad so it doesn't cover the game */
+            display: flex; flex-direction: column; width: 100%; max-width: 950px; 
+            align-items: center; padding: 10px; box-sizing: border-box;
+            flex-grow: 1; overflow-y: auto; padding-bottom: 180px; 
         }
-        @media (min-width: 768px) { 
-            #main-container { flex-direction: row; gap: 20px; align-items: flex-start; padding-bottom: 20px; } 
-        }
+        @media (min-width: 768px) { #main-container { flex-direction: row; gap: 20px; align-items: flex-start; padding-bottom: 20px; } }
 
-        canvas { 
-            background: #000; 
-            border: 4px solid #444; 
-            border-radius: 15px; 
-            max-width: 100%; 
-            height: auto; 
-            touch-action: none; 
-            flex-shrink: 0;
-        }
+        canvas { background: #000; border: 4px solid #444; border-radius: 15px; max-width: 100%; height: auto; touch-action: none; flex-shrink: 0; }
 
         #journal {
             width: 100%; max-width: 300px; height: 100px; background: #1a1a2e; 
-            border: 2px solid #333; border-radius: 10px; padding: 10px; display: flex; flex-direction: column;
-            margin-top: 10px;
+            border: 2px solid #333; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; margin-top: 10px;
         }
         @media (min-width: 768px) { #journal { height: 400px; } }
 
         #insight-list { overflow-y: auto; flex-grow: 1; font-size: 0.8rem; margin-top: 5px; }
         .insight-entry { margin-bottom: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 4px solid #555; }
         
-        /* CENTERED MOBILE ARROW CONTROLS */
         #dpad-container {
-            position: fixed;
-            bottom: 20px; /* Positioned slightly higher to avoid system gestures */
-            left: 50%;
-            transform: translateX(-50%);
-            display: grid;
-            grid-template-areas: 
-                ". up ."
-                "left . right"
-                ". down .";
-            gap: 10px;
-            z-index: 1000;
-            background: rgba(0,0,0,0.3); /* Subtle background to keep arrows visible */
-            padding: 10px;
-            border-radius: 20px;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: grid; grid-template-areas: ". up ." "left . right" ". down .";
+            gap: 10px; z-index: 1000; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 20px;
         }
         @media (min-width: 1024px) { #dpad-container { display: none; } }
 
         .arrow-btn {
-            width: 55px; 
-            height: 55px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            color: white;
-            user-select: none;
-            touch-action: none;
+            width: 55px; height: 55px; background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 12px;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 20px; color: white; user-select: none; touch-action: none;
         }
-        .arrow-btn:active {
-            background: var(--fth-color);
-            border-color: #fff;
-            transform: scale(0.9);
-        }
-        #up { grid-area: up; }
-        #left { grid-area: left; }
-        #right { grid-area: right; }
-        #down { grid-area: down; }
+        .arrow-btn:active { background: var(--fth-color); border-color: #fff; transform: scale(0.9); }
+        #up { grid-area: up; } #left { grid-area: left; } #right { grid-area: right; } #down { grid-area: down; }
 
+        /* FIXED POPUPS */
         #popup, #unity-overlay {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #fff; color: #111; padding: 25px; width: 80%; max-width: 350px;
+            background: #fff; color: #111; padding: 25px; width: 85%; max-width: 380px;
             display: none; z-index: 2000; text-align: center; border-radius: 20px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 0 0 40px rgba(0,0,0,0.8); box-sizing: border-box;
         }
-        #unity-overlay { top:0; left:0; transform:none; width:100%; height:100%; max-width:none; opacity:0; transition: opacity 2s; flex-direction: column; justify-content: center; align-items: center; }
+        
+        /* Fixed Unity Overlay: Centering Logic */
+        #unity-overlay { 
+            display: none; /* Controlled by JS */
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            opacity: 0; 
+            transition: opacity 2s; 
+        }
+
         button { background: var(--fth-color); color: white; border: none; padding: 12px 25px; cursor: pointer; margin-top: 15px; border-radius: 50px; font-weight: 600; font-family: 'Fredoka'; }
     </style>
 </head>
@@ -147,13 +105,14 @@
 <div id="popup">
     <h3 id="popupTitle">Eureka!</h3>
     <p id="popupText" style="font-size: 0.9rem;"></p>
-    <button onclick="closePopup()">Keep Exploring</button>
+    <button onclick="closePopup()">Keep Exploring (Space)</button>
 </div>
 
 <div id="unity-overlay">
     <div style="font-size: 50px;">✨</div>
-    <h2>The Multidimensional View of Truth</h2>
-    <p style="padding: 10px; font-size: 0.9rem;">Reason and Faith complement each other. Reason sharpens faith, and faith softens reason.</p>
+    <h2 style="margin: 10px 0;">The Multidimensional View of Truth</h2>
+    <p style="padding: 10px; font-size: 0.9rem; line-height: 1.4;">Reason and Faith complement each other. Reason sharpens faith, and faith softens reason.</p>
+    <p style="padding: 10px; font-size: 0.9rem;">Without each other, the truth is incomplete. We must not blindly believe, but we must also acknowledge that there is a Creator.</p>
     <button onclick="location.reload()">Restart Journey</button>
 </div>
 
@@ -164,25 +123,15 @@ bgMusic.src = "https://github.com/jollyannx/LCFAITH/raw/refs/heads/main/%5Bno%20
 bgMusic.volume = 0.5;
 const collectSound = new Audio("https://actions.google.com/sounds/v1/foley/drawbridge_chain_clatter.ogg");
 
-function startAudio() {
-    if (bgMusic.paused) bgMusic.play().catch(() => {});
-}
+function startAudio() { if (bgMusic.paused) bgMusic.play().catch(() => {}); }
 
 let activeMobileKeys = { up: false, down: false, left: false, right: false };
-
 function bindArrow(id, key) {
     const el = document.getElementById(id);
-    const setKey = (val) => (e) => {
-        e.preventDefault();
-        startAudio();
-        activeMobileKeys[key] = val;
-    };
-    el.addEventListener('touchstart', setKey(true));
-    el.addEventListener('touchend', setKey(false));
-    el.addEventListener('mousedown', setKey(true));
-    el.addEventListener('mouseup', setKey(false));
+    const setKey = (val) => (e) => { e.preventDefault(); startAudio(); activeMobileKeys[key] = val; };
+    el.addEventListener('touchstart', setKey(true)); el.addEventListener('touchend', setKey(false));
+    el.addEventListener('mousedown', setKey(true)); el.addEventListener('mouseup', setKey(false));
 }
-
 bindArrow('up', 'up'); bindArrow('down', 'down'); bindArrow('left', 'left'); bindArrow('right', 'right');
 
 const canvas = document.getElementById('gameCanvas');
@@ -195,35 +144,32 @@ const counterDisplay = document.getElementById('counter');
 const scienceInsights = ["The Big Bang is said to have created the universe. But who created the big bang?", "Snowflakes are beautiful. I wonder who designed them.", "Empirical data provides the objective foundation of truth.", "Critical Reasoning helps us find the evidence of truth. It's okay to doubt.", "Reason defines the laws of the world.", "Observation turns the unknown into the measurable.", "Logic is truth. So is believing in God not logical?", "Our doubt prevents us from falling into error."];
 const faithInsights = ["Faith is the firm belief of something without proof. Is that reasonable?", "Chances that God is real are 50/50. Most gamblers would take that bet.", "Some people do things they don't even understand. Why devote yourself?", "Religion gives you purpose for the journey.", "Faith recognizes the beauty that data alone cannot describe.", "Values determine how we apply the power of our knowledge.", "Spirituality reminds us that the observer is part of the mystery."];
 
-let sciencePool = [...scienceInsights];
-let faithPool = [...faithInsights];
+let sciencePool = [...scienceInsights], faithPool = [...faithInsights];
 let player, fragments, walls, collectedCount, gameActive, visibilityRadius;
 const cellSize = 40;
-const cols = Math.floor(canvas.width / cellSize);
-const rows = Math.floor(canvas.height / cellSize);
+const cols = Math.floor(canvas.width / cellSize), rows = Math.floor(canvas.height / cellSize);
 let keys = {};
+
+window.addEventListener('keydown', (e) => {
+    if (popup.style.display === 'block') {
+        if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); closePopup(); }
+    }
+    startAudio(); keys[e.code] = true;
+});
+window.addEventListener('keyup', e => keys[e.code] = false);
 
 function initGame() {
     player = { x: cellSize/2, y: cellSize/2, size: 8, speed: 3.5 };
     fragments = []; walls = []; collectedCount = 0; visibilityRadius = 65; gameActive = true;
-    
     const grid = [];
-    for(let r=0; r<rows; r++) {
-        grid[r] = [];
-        for(let c=0; c<cols; c++) grid[r][c] = { r, c, visited: false, walls: [true, true, true, true] };
-    }
-    const stack = [];
-    let current = grid[0][0];
-    current.visited = true;
-
+    for(let r=0; r<rows; r++) { grid[r] = []; for(let c=0; c<cols; c++) grid[r][c] = { r, c, visited: false, walls: [true, true, true, true] }; }
+    const stack = []; let current = grid[0][0]; current.visited = true;
     while(true) {
-        let neighbors = [];
-        let {r, c} = current;
+        let neighbors = []; let {r, c} = current;
         if(r > 0 && !grid[r-1][c].visited) neighbors.push(grid[r-1][c]);
         if(c < cols-1 && !grid[r][c+1].visited) neighbors.push(grid[r][c+1]);
         if(r < rows-1 && !grid[r+1][c].visited) neighbors.push(grid[r+1][c]);
         if(c > 0 && !grid[r][c-1].visited) neighbors.push(grid[r][c-1]);
-
         if(neighbors.length > 0) {
             let next = neighbors[Math.floor(Math.random()*neighbors.length)];
             if(next.r < current.r) { current.walls[0] = false; next.walls[2] = false; }
@@ -233,7 +179,6 @@ function initGame() {
             next.visited = true; stack.push(current); current = next;
         } else if(stack.length > 0) { current = stack.pop(); } else break;
     }
-
     for(let r=0; r<rows; r++) {
         for(let c=0; c<cols; c++) {
             let x = c * cellSize, y = r * cellSize;
@@ -243,9 +188,7 @@ function initGame() {
             if(grid[r][c].walls[3]) walls.push({x, y, w: 4, h: cellSize});
         }
     }
-
-    let cells = [];
-    for(let r=0; r<rows; r++) for(let c=0; c<cols; c++) if(r+c > 3) cells.push({r, c});
+    let cells = []; for(let r=0; r<rows; r++) for(let c=0; c<cols; c++) if(r+c > 3) cells.push({r, c});
     cells.sort(() => Math.random()-0.5);
     for(let i=0; i<8; i++) {
         let type = i < 4 ? 'reason' : 'faith';
@@ -253,9 +196,6 @@ function initGame() {
     }
     requestAnimationFrame(gameLoop);
 }
-
-window.addEventListener('keydown', e => { startAudio(); keys[e.code] = true; });
-window.addEventListener('keyup', e => keys[e.code] = false);
 
 function closePopup() {
     popup.style.display = "none";
@@ -273,24 +213,19 @@ function update() {
     if (keys['KeyS'] || keys['ArrowDown'] || activeMobileKeys.down) dy = player.speed;
     if (keys['KeyA'] || keys['ArrowLeft'] || activeMobileKeys.left) dx = -player.speed;
     if (keys['KeyD'] || keys['ArrowRight'] || activeMobileKeys.right) dx = player.speed;
-
     let nX = player.x + dx, nY = player.y + dy;
     let hitWall = walls.some(w => nX+3 > w.x && nX-3 < w.x+w.w && nY+3 > w.y && nY-3 < w.y+w.h);
     if(!hitWall) { player.x = nX; player.y = nY; }
-
     fragments.forEach(f => {
         if (!f.collected && Math.hypot(player.x - f.x, player.y - f.y) < 15) {
-            f.collected = true; collectedCount++;
-            counterDisplay.innerText = collectedCount;
-            visibilityRadius += 20; gameActive = false;
-            collectSound.play();
+            f.collected = true; collectedCount++; counterDisplay.innerText = collectedCount;
+            visibilityRadius += 20; gameActive = false; collectSound.play();
             const pool = f.type === 'reason' ? sciencePool : faithPool;
             const text = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
             document.getElementById('popupText').innerText = text;
             popup.style.display = 'block';
             const entry = document.createElement('div');
-            entry.className = `insight-entry`;
-            entry.style.borderLeftColor = f.type === 'reason' ? 'var(--sci-color)' : 'var(--fth-color)';
+            entry.className = `insight-entry`; entry.style.borderLeftColor = f.type === 'reason' ? 'var(--sci-color)' : 'var(--fth-color)';
             entry.innerHTML = `<strong>${f.type.toUpperCase()}:</strong> ${text}`;
             insightList.prepend(entry);
         }
@@ -299,8 +234,7 @@ function update() {
 
 function draw() {
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-    ctx.beginPath(); ctx.arc(player.x, player.y, visibilityRadius, 0, Math.PI * 2); ctx.clip();
+    ctx.save(); ctx.beginPath(); ctx.arc(player.x, player.y, visibilityRadius, 0, Math.PI * 2); ctx.clip();
     ctx.fillStyle = '#080812'; ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#333'; walls.forEach(w => ctx.fillRect(w.x, w.y, w.w, w.h));
     fragments.forEach(f => {
@@ -309,13 +243,10 @@ function draw() {
             if(f.type === 'reason') {
                 ctx.beginPath(); for(let i=0;i<10;i++){ let r=i%2==0?8:3; let a=(Math.PI/5)*i-Math.PI/2; ctx.lineTo(f.x+r*Math.cos(a), f.y+r*Math.sin(a)); }
                 ctx.closePath(); ctx.fill();
-            } else {
-                ctx.fillRect(f.x-1, f.y-6, 2, 12); ctx.fillRect(f.x-6, f.y-1, 12, 2);
-            }
+            } else { ctx.fillRect(f.x-1, f.y-6, 2, 12); ctx.fillRect(f.x-6, f.y-1, 12, 2); }
         }
     });
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(player.x, player.y, 5, 0, Math.PI*2); ctx.fill();
-    ctx.restore();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(player.x, player.y, 5, 0, Math.PI*2); ctx.fill(); ctx.restore();
 }
 
 function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
