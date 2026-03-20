@@ -42,44 +42,45 @@
         #insight-list { overflow-y: auto; flex-grow: 1; font-size: 0.9rem; margin-top: 10px; }
         .insight-entry { margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 4px solid #555; }
         
-        /* MOBILE D-PAD CONTROLS */
-        #controls-wrapper {
+        /* MOBILE ARROW CONTROLS - REPLACING JOYSTICK */
+        #dpad-container {
             position: fixed;
-            bottom: 30px;
+            bottom: 40px;
             left: 30px;
             display: grid;
             grid-template-areas: 
                 ". up ."
                 "left . right"
                 ". down .";
-            gap: 10px;
+            gap: 8px;
             z-index: 1000;
         }
-        @media (min-width: 1024px) { #controls-wrapper { display: none; } }
+        /* Hidden on large screens/desktops */
+        @media (min-width: 1024px) { #dpad-container { display: none; } }
 
-        .ctrl-btn {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 12px;
+        .arrow-btn {
+            width: 55px;
+            height: 55px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 20px;
             color: white;
             user-select: none;
-            touch-action: none;
+            touch-action: none; /* Crucial for mobile responsiveness */
         }
-        .ctrl-btn:active {
+        .arrow-btn:active {
             background: var(--fth-color);
-            border-color: white;
-            transform: scale(0.95);
+            border-color: #fff;
+            transform: scale(0.9);
         }
-        #btn-up { grid-area: up; }
-        #btn-left { grid-area: left; }
-        #btn-right { grid-area: right; }
-        #btn-down { grid-area: down; }
+        #up { grid-area: up; }
+        #left { grid-area: left; }
+        #right { grid-area: right; }
+        #down { grid-area: down; }
 
         #popup, #unity-overlay {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -90,7 +91,7 @@
         button { background: var(--fth-color); color: white; border: none; padding: 12px 25px; cursor: pointer; margin-top: 15px; border-radius: 50px; font-weight: 600; font-family: 'Fredoka'; }
     </style>
 </head>
-<body>
+<body onclick="startAudio()">
 
 <header>
     <h1 style="color: var(--fth-color);">Holy Shift!</h1>
@@ -106,11 +107,11 @@
     </div>
 </div>
 
-<div id="controls-wrapper">
-    <div id="btn-up" class="ctrl-btn">▲</div>
-    <div id="btn-left" class="ctrl-btn">◀</div>
-    <div id="btn-right" class="ctrl-btn">▶</div>
-    <div id="btn-down" class="ctrl-btn">▼</div>
+<div id="dpad-container">
+    <div id="up" class="arrow-btn">▲</div>
+    <div id="left" class="arrow-btn">◀</div>
+    <div id="right" class="arrow-btn">▶</div>
+    <div id="down" class="arrow-btn">▼</div>
 </div>
 
 <div id="popup">
@@ -136,29 +137,31 @@ bgMusic.volume = 0.5;
 const collectSound = new Audio("https://actions.google.com/sounds/v1/foley/drawbridge_chain_clatter.ogg");
 
 function startAudio() {
-    if (bgMusic.paused) bgMusic.play();
+    if (bgMusic.paused) bgMusic.play().catch(() => {});
 }
 
-// --- D-PAD LOGIC ---
-let mobileKeys = { up: false, down: false, left: false, right: false };
+// --- ARROW MOVEMENT LOGIC ---
+let activeMobileKeys = { up: false, down: false, left: false, right: false };
 
-function setupDPad(id, key) {
-    const btn = document.getElementById(id);
-    const start = (e) => { e.preventDefault(); startAudio(); mobileKeys[key] = true; };
-    const end = (e) => { e.preventDefault(); mobileKeys[key] = false; };
-    
-    btn.addEventListener('touchstart', start);
-    btn.addEventListener('touchend', end);
-    btn.addEventListener('mousedown', start); // For testing on PC
-    btn.addEventListener('mouseup', end);
+function bindArrow(id, key) {
+    const el = document.getElementById(id);
+    const setKey = (val) => (e) => {
+        e.preventDefault();
+        startAudio();
+        activeMobileKeys[key] = val;
+    };
+    el.addEventListener('touchstart', setKey(true));
+    el.addEventListener('touchend', setKey(false));
+    el.addEventListener('mousedown', setKey(true)); // For mouse testing
+    el.addEventListener('mouseup', setKey(false));
 }
 
-setupDPad('btn-up', 'up');
-setupDPad('btn-down', 'down');
-setupDPad('btn-left', 'left');
-setupDPad('btn-right', 'right');
+bindArrow('up', 'up');
+bindArrow('down', 'down');
+bindArrow('left', 'left');
+bindArrow('right', 'right');
 
-// --- GAME LOGIC ---
+// --- GAME CORE ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const insightList = document.getElementById('insight-list');
@@ -178,7 +181,7 @@ const rows = Math.floor(canvas.height / cellSize);
 let keys = {};
 
 function initGame() {
-    player = { x: cellSize/2, y: cellSize/2, size: 8, speed: 3.0 };
+    player = { x: cellSize/2, y: cellSize/2, size: 8, speed: 3.5 };
     fragments = []; walls = []; collectedCount = 0; visibilityRadius = 65; gameActive = true;
     
     const grid = [];
@@ -244,11 +247,11 @@ function update() {
     if (!gameActive) return;
     let dx = 0, dy = 0;
 
-    // Keyboard & D-Pad merged logic
-    if (keys['KeyW'] || keys['ArrowUp'] || mobileKeys.up) dy = -player.speed;
-    if (keys['KeyS'] || keys['ArrowDown'] || mobileKeys.down) dy = player.speed;
-    if (keys['KeyA'] || keys['ArrowLeft'] || mobileKeys.left) dx = -player.speed;
-    if (keys['KeyD'] || keys['ArrowRight'] || mobileKeys.right) dx = player.speed;
+    // Movement Check (Keyboard OR D-Pad)
+    if (keys['KeyW'] || keys['ArrowUp'] || activeMobileKeys.up) dy = -player.speed;
+    if (keys['KeyS'] || keys['ArrowDown'] || activeMobileKeys.down) dy = player.speed;
+    if (keys['KeyA'] || keys['ArrowLeft'] || activeMobileKeys.left) dx = -player.speed;
+    if (keys['KeyD'] || keys['ArrowRight'] || activeMobileKeys.right) dx = player.speed;
 
     let nX = player.x + dx, nY = player.y + dy;
     let hitWall = walls.some(w => nX+3 > w.x && nX-3 < w.x+w.w && nY+3 > w.y && nY-3 < w.y+w.h);
