@@ -137,13 +137,16 @@ const jBase = document.getElementById('joystick-base');
 const jHandle = document.getElementById('joystick-handle');
 let stickX = 0, stickY = 0, isDragging = false;
 
+// SENSITIVITY SETTINGS
+const maxDist = 35; // Lowered from 50: Thumb moves less to hit max speed
+const sensitivity = 1.5; // Multiplier: Makes small movements faster
+
 jBase.addEventListener('touchstart', (e) => { 
     isDragging = true; 
     startAudio();
     moveJoystick(e);
 }, { passive: false });
 
-// Listen on window so movement continues even if finger leaves the base circle
 window.addEventListener('touchmove', (e) => {
     if (isDragging) moveJoystick(e);
 }, { passive: false });
@@ -163,8 +166,6 @@ function moveJoystick(e) {
     const dx = touch.clientX - centerX;
     const dy = touch.clientY - centerY;
     
-    // 50px is the max distance the handle can move from center
-    const maxDist = 50;
     const dist = Math.min(Math.hypot(dx, dy), maxDist);
     const angle = Math.atan2(dy, dx);
     
@@ -173,9 +174,10 @@ function moveJoystick(e) {
     
     jHandle.style.transform = `translate(calc(-50% + ${mx}px), calc(-50% + ${my}px))`;
     
-    // Normalize movement to a value between -1 and 1
-    stickX = mx / maxDist;
-    stickY = my / maxDist;
+    // Normalize and apply sensitivity multiplier
+    // Math.min/max ensures we don't exceed -1 to 1 range
+    stickX = Math.max(-1, Math.min(1, (mx / maxDist) * sensitivity));
+    stickY = Math.max(-1, Math.min(1, (my / maxDist) * sensitivity));
 }
 
 // --- GAME LOGIC ---
