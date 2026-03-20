@@ -13,7 +13,7 @@
         }
         body { 
             margin: 0; background: var(--bg-dark); color: white; 
-            font-family: 'Fredoka', sans-serif; /* Updated Font */
+            font-family: 'Fredoka', sans-serif;
             display: flex; flex-direction: column; 
             align-items: center; min-height: 100vh; overflow: hidden;
         }
@@ -41,11 +41,23 @@
         #insight-list { overflow-y: auto; flex-grow: 1; font-size: 0.9rem; margin-top: 10px; }
         .insight-entry { margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; border-left: 4px solid #555; }
         
-        #controls { display: flex; flex-wrap: wrap; width: 160px; height: 160px; margin: 10px; gap: 8px; justify-content: center; position: relative; z-index: 5; }
-        @media (min-width: 768px) { #controls { display: none; } }
+        /* Joystick Styling */
+        #joystick-wrapper { 
+            width: 160px; height: 160px; margin: 10px; 
+            display: flex; justify-content: center; align-items: center; 
+            position: relative; touch-action: none;
+        }
+        @media (min-width: 768px) { #joystick-wrapper { display: none; } }
         
-        .joy-btn { width: 50px; height: 50px; background: #333; border: none; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; user-select: none; font-size: 1.5rem; box-shadow: 0 4px 0 #000; }
-        .joy-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #000; }
+        #joystick-base {
+            width: 120px; height: 120px; background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 50%; position: relative;
+        }
+        #joystick-handle {
+            width: 50px; height: 50px; background: var(--fth-color);
+            border-radius: 50%; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); box-shadow: 0 0 15px var(--fth-color);
+        }
 
         #popup, #unity-overlay {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -72,11 +84,10 @@
     </div>
 </div>
 
-<div id="controls">
-    <div style="width:100%; display:flex; justify-content:center;"><div class="joy-btn" onmousedown="keys['KeyW']=true" onmouseup="keys['KeyW']=false" ontouchstart="startAudio(); keys['KeyW']=true" ontouchend="keys['KeyW']=false">↑</div></div>
-    <div class="joy-btn" onmousedown="keys['KeyA']=true" onmouseup="keys['KeyA']=false" ontouchstart="startAudio(); keys['KeyA']=true" ontouchend="keys['KeyA']=false">←</div>
-    <div class="joy-btn" onmousedown="keys['KeyS']=true" onmouseup="keys['KeyS']=false" ontouchstart="startAudio(); keys['KeyS']=true" ontouchend="keys['KeyS']=false">↓</div>
-    <div class="joy-btn" onmousedown="keys['KeyD']=true" onmouseup="keys['KeyD']=false" ontouchstart="startAudio(); keys['KeyD']=true" ontouchend="keys['KeyD']=false">→</div>
+<div id="joystick-wrapper">
+    <div id="joystick-base">
+        <div id="joystick-handle"></div>
+    </div>
 </div>
 
 <div id="popup">
@@ -97,7 +108,6 @@
 // --- AUDIO SYSTEM ---
 const bgMusic = new Audio();
 bgMusic.loop = true;
-// PASTE YOUR MUSIC LINK BELOW:
 bgMusic.src = "https://github.com/jollyannx/LCFAITH/raw/refs/heads/main/%5Bno%20copyright%20music%5D%20%20coffee%20time%20%20cute%20vlog%20music.mp3"; 
 bgMusic.volume = 0.5;
 
@@ -108,6 +118,44 @@ function startAudio() {
 }
 window.addEventListener('keydown', startAudio, { once: true });
 
+// --- JOYSTICK LOGIC ---
+const jBase = document.getElementById('joystick-base');
+const jHandle = document.getElementById('joystick-handle');
+let stickX = 0, stickY = 0, isDragging = false;
+
+jBase.addEventListener('touchstart', (e) => { 
+    isDragging = true; 
+    startAudio();
+    moveJoystick(e);
+});
+
+window.addEventListener('touchmove', moveJoystick, { passive: false });
+window.addEventListener('touchend', () => {
+    isDragging = false;
+    stickX = 0; stickY = 0;
+    jHandle.style.transform = `translate(-50%, -50%)`;
+});
+
+function moveJoystick(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    const rect = jBase.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const touch = e.touches[0];
+    const dx = touch.clientX - centerX;
+    const dy = touch.clientY - centerY;
+    const dist = Math.min(Math.hypot(dx, dy), 50);
+    const angle = Math.atan2(dy, dx);
+    
+    const mx = Math.cos(angle) * dist;
+    const my = Math.sin(angle) * dist;
+    
+    jHandle.style.transform = `translate(calc(-50% + ${mx}px), calc(-50% + ${my}px))`;
+    stickX = mx / 50;
+    stickY = my / 50;
+}
+
 // --- GAME LOGIC ---
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -116,23 +164,8 @@ const popup = document.getElementById('popup');
 const unityOverlay = document.getElementById('unity-overlay');
 const counterDisplay = document.getElementById('counter');
 
-const scienceInsights = [
-    "The Big Bang is said to have created the universe. But who created the big bang?",
-    "Snowflakes are beautiful. I wonder who designed them.",
-    "Empirical data provides the objective foundation of truth.",
-    "Critical Reasoning helps us find the evidence of truth. It's okay to doubt.",
-    "Reason defines the laws of the world.",
-    "Observation turns the unknown into the measurable.",
-    "Logic is truth. So is believing in God not logical?",
-    "Our doubt prevents us from falling into error."];
-const faithInsights = [
-    "Faith is the firm belief of something without proof. Is that reasonable?",
-    "Chances that God is real are 50/50. Most gamblers would take that bet.",
-    "Some people do things they don't even understand. Why devote yourself?",
-    "Religion gives you purpose for the journey.",
-    "Faith recognizes the beauty that data alone cannot describe.",
-    "Values determine how we apply the power of our knowledge.",
-    "Spirituality reminds us that the observer is part of the mystery."];
+const scienceInsights = ["The Big Bang is said to have created the universe. But who created the big bang?", "Snowflakes are beautiful. I wonder who designed them.", "Empirical data provides the objective foundation of truth.", "Critical Reasoning helps us find the evidence of truth. It's okay to doubt.", "Reason defines the laws of the world.", "Observation turns the unknown into the measurable.", "Logic is truth. So is believing in God not logical?", "Our doubt prevents us from falling into error."];
+const faithInsights = ["Faith is the firm belief of something without proof. Is that reasonable?", "Chances that God is real are 50/50. Most gamblers would take that bet.", "Some people do things they don't even understand. Why devote yourself?", "Religion gives you purpose for the journey.", "Faith recognizes the beauty that data alone cannot describe.", "Values determine how we apply the power of our knowledge.", "Spirituality reminds us that the observer is part of the mystery."];
 
 let sciencePool = [...scienceInsights];
 let faithPool = [...faithInsights];
@@ -146,7 +179,6 @@ function initGame() {
     player = { x: cellSize/2, y: cellSize/2, size: 8, speed: 2.5 };
     fragments = []; walls = []; collectedCount = 0; visibilityRadius = 65; gameActive = true;
     
-    // Simple Maze Generation (DFS)
     const grid = [];
     for(let r=0; r<rows; r++) {
         grid[r] = [];
@@ -184,13 +216,12 @@ function initGame() {
         }
     }
 
-    let availableCells = [];
-    for(let r=0; r<rows; r++) for(let c=0; c<cols; c++) if(r+c > 3) availableCells.push({r, c});
-    availableCells.sort(() => Math.random()-0.5);
-    
+    let cells = [];
+    for(let r=0; r<rows; r++) for(let c=0; c<cols; c++) if(r+c > 3) cells.push({r, c});
+    cells.sort(() => Math.random()-0.5);
     for(let i=0; i<8; i++) {
         let type = i < 4 ? 'reason' : 'faith';
-        fragments.push({ x: availableCells[i].c * cellSize + 20, y: availableCells[i].r * cellSize + 20, type, collected: false });
+        fragments.push({ x: cells[i].c * cellSize + 20, y: cells[i].r * cellSize + 20, type, collected: false });
     }
     requestAnimationFrame(gameLoop);
 }
@@ -209,14 +240,23 @@ function closePopup() {
 
 function update() {
     if (!gameActive) return;
-    let nextX = player.x, nextY = player.y;
-    if (keys['KeyW'] || keys['ArrowUp']) nextY -= player.speed;
-    if (keys['KeyS'] || keys['ArrowDown']) nextY += player.speed;
-    if (keys['KeyA'] || keys['ArrowLeft']) nextX -= player.speed;
-    if (keys['KeyD'] || keys['ArrowRight']) nextX += player.speed;
+    let dx = 0, dy = 0;
 
-    let hitWall = walls.some(w => nextX+3 > w.x && nextX-3 < w.x+w.w && nextY+3 > w.y && nextY-3 < w.y+w.h);
-    if(!hitWall) { player.x = nextX; player.y = nextY; }
+    // Keyboard Logic
+    if (keys['KeyW'] || keys['ArrowUp']) dy = -player.speed;
+    if (keys['KeyS'] || keys['ArrowDown']) dy = player.speed;
+    if (keys['KeyA'] || keys['ArrowLeft']) dx = -player.speed;
+    if (keys['KeyD'] || keys['ArrowRight']) dx = player.speed;
+
+    // Joystick Logic (Overrides keyboard if moved)
+    if (isDragging) {
+        dx = stickX * player.speed;
+        dy = stickY * player.speed;
+    }
+
+    let nX = player.x + dx, nY = player.y + dy;
+    let hitWall = walls.some(w => nX+3 > w.x && nX-3 < w.x+w.w && nY+3 > w.y && nY-3 < w.y+w.h);
+    if(!hitWall) { player.x = nX; player.y = nY; }
 
     fragments.forEach(f => {
         if (!f.collected && Math.hypot(player.x - f.x, player.y - f.y) < 15) {
@@ -225,13 +265,11 @@ function update() {
             counterDisplay.innerText = collectedCount;
             visibilityRadius += 20; 
             gameActive = false;
-            collectSound.play(); // Play collection sound
-
+            collectSound.play();
             const pool = f.type === 'reason' ? sciencePool : faithPool;
             const text = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
             document.getElementById('popupText').innerText = text;
             popup.style.display = 'block';
-
             const entry = document.createElement('div');
             entry.className = `insight-entry`;
             entry.style.borderLeftColor = f.type === 'reason' ? 'var(--sci-color)' : 'var(--fth-color)';
